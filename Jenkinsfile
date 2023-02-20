@@ -33,7 +33,7 @@ pipeline {
 			}
 		stage('Build'){
 		    steps{
-		       sh "clean package"
+		       sh "mvn clean package"
 		    }
 		 }
 	    stage('pull'){
