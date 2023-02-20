@@ -1,9 +1,13 @@
 pipeline {
   agent any
+   tools {
+    maven 'M3'
+  }
   environment {
     CLOUDSDK_CORE_PROJECT='capable-sphinx-378108'
     CLIENT_EMAIL='jenkins@capable-sphinx-378108.iam.gserviceaccount.com'
     GCLOUD_CREDS=credentials('gcloud-creds')
+    DOCKERHUB_CREDENTIALS = credentials('docker')
   }
   stages {
     stage('Verify version') {
@@ -20,6 +24,36 @@ pipeline {
         '''
       }
     }
+    stage('Login') {
+		    steps {
+              sh "echo $DOCKERHUB_CREDENTIALS_USR"
+           sh "echo $DOCKERHUB_CREDENTIALS_PSW"
+		        sh  "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW"
+			}
+		}
+	stage('Build'){
+            steps{
+               sh "clean package"
+            }
+         }
+    stage('pull'){
+            steps{
+               sh "docker pull  moredatta574/jenkins-demo"
+            }
+         }
+       stage('tag'){
+            steps{
+               sh "docker tag  moredatta574/jenkins-demo gcr.io/capable-sphinx-378108/moredatta574/jenkins-demo"
+            }
+         }
+    stage('push'){
+            steps{
+               sh "docker push gcr.io/capable-sphinx-378108/moredatta574/jenkins-demo"
+            }
+         }
+    
+      
+      
     stage('Install service') {
       steps {
         sh '''
